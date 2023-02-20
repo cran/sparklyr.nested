@@ -34,7 +34,11 @@ sdf_schema_json <- function(x, parse_json=TRUE, simplify=FALSE, append_complex_t
 
 #' @rdname sdf_schema_json
 #' @export
-#' @importFrom listviewer jsonedit
+#' @param use_react Logical. If \code{TRUE} schemas will be rendered using \link[listviewer]{reactjson}.
+#'   Otherwise they will be rendered using \link[listviewer]{jsonedit} (the default). Using react works better
+#'   in some contexts (e.g. bookdown-rendered HTML) and has a different look & feel. It does however carry
+#'   an extra dependency on the \code{reactR} package suggested by \code{listviewer}.
+#' @importFrom listviewer jsonedit reactjson
 #' @examples
 #' \dontrun{
 #' library(testthat)
@@ -64,9 +68,13 @@ sdf_schema_json <- function(x, parse_json=TRUE, simplify=FALSE, append_complex_t
 #'   sdf_schema_viewer(spark_data)
 #' )
 #' }
-sdf_schema_viewer <- function(x, simplify=TRUE,  append_complex_type=TRUE) {
+sdf_schema_viewer <- function(x, simplify=TRUE,  append_complex_type=TRUE, use_react = FALSE) {
   schema <- sdf_schema_json(x, simplify=simplify, append_complex_type=append_complex_type)
-  jsonedit(schema) 
+  if (use_react) {
+    reactjson(schema, collapsed = 1, displayDataTypes = FALSE, onEdit = FALSE, onAdd = FALSE, onDelete = FALSE)
+  } else {
+    jsonedit(schema) 
+  }
 }
 
 #' @keywords internal

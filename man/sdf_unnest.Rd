@@ -24,7 +24,7 @@ at the top level. Similar to \code{tidyr::unnest}.
 \details{
 Note that this is a less precise tool than using \code{\link{sdf_explode}} and \code{\link{sdf_select}}
 directly because all fields of the exploded array will be kept and promoted. Direct calls to these
-methods allows for more targetted use of \code{\link{sdf_select}} to promote only those fields that
+methods allows for more targeted use of \code{\link{sdf_select}} to promote only those fields that
 are wanted to the top level of the data frame.
 
 Additionally, though \code{\link{sdf_select}} allows users to reach arbitrarily far into a nested
@@ -39,8 +39,8 @@ of the schema interrogation drives the value o \code{is_map} provided to \code{s
 \examples{
 \dontrun{
 # first get some nested data
-iris2 <- copy_to(sc, iris, name="iris")
-iris_nst <- iris2 \%>\%
+iris_tbl <- copy_to(sc, iris, name="iris")
+iris_nst <- iris_tbl \%>\%
   sdf_nest(Sepal_Length, Sepal_Width, Petal_Length, Petal_Width, .key="data") \%>\%
   group_by(Species) \%>\%
   summarize(data=collect_list(data))

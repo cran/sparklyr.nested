@@ -26,17 +26,18 @@
 #'   less natural to use when calling the function directly. It is likely to get you into trouble
 #'   if you are using \code{dplyr} select helpers. The alternative with direct calls
 #'   is to put the alias on the left side of the expression (e.g. \code{sdf_select(df, fld_alias=parent.child.fld)})
-#' @importFrom dplyr select_vars %>%
+#' @importFrom dplyr %>%
 #' @importFrom purrr map flatten_chr
 #' @importFrom rlang !!! quos quo_name set_names
+#' @importFrom tidyselect vars_select
 #' @export
 #' 
 #' @examples 
 #' \dontrun{
 #' # produces a dataframe with an array of characteristics nested under
 #' # each unique species identifier
-#' iris2 <- copy_to(sc, iris, name="iris")
-#' iris_nst <- iris2 %>%
+#' iris_tbl <- copy_to(sc, iris, name="iris")
+#' iris_nst <- iris_tbl %>%
 #'   sdf_nest(Sepal_Length, Sepal_Width, .key="Sepal") 
 #' 
 #' # using java-like dot-notation
@@ -55,7 +56,7 @@ sdf_select <- function(x, ..., .aliases, .drop_parents=TRUE, .full_name=FALSE) {
   
   dots <- quos(...)
   
-  # need to pull out nested field refs since select_vars will not find them
+  # need to pull out nested field refs since vars_select will not find them
   arg_strings <- dots %>% 
     map(quo_name) %>%
     flatten_chr() %>%
@@ -63,8 +64,8 @@ sdf_select <- function(x, ..., .aliases, .drop_parents=TRUE, .full_name=FALSE) {
   id <- is_nested_field_ref(arg_strings)
   
   # collect field names to select as strings
-  # `!!!` will splice dots[!id] into `...` of select_vars
-  top_level_vars <- select_vars(colnames(x), !!! dots[!id])
+  # `!!!` will splice dots[!id] into `...` of vars_select
+  top_level_vars <- vars_select(colnames(x), !!! dots[!id])
   nested_vars <- arg_strings[id] %>%
     # support both dot and dollar sign notation
     gsub(pattern="$", replacement=".", fixed=TRUE)
@@ -91,7 +92,7 @@ sdf_select <- function(x, ..., .aliases, .drop_parents=TRUE, .full_name=FALSE) {
     } else {
       nested_names <- nested_vars %>%
         strsplit(split=".", fixed=TRUE) %>%
-        map(function(y){return(y[[2]])}) %>%
+        map(function(y){return(y[[length(y)]])}) %>%
         flatten_chr()
       if (any(nested_names %in% .aliases)) {
         .aliases <- gsub(".", "_", .aliases, fixed=TRUE)
